@@ -1,0 +1,6 @@
+- Primeiramente, faz-se a instalação das seguintes bibliotecas:
+pip install selenium
+pip install webdriver_manager
+pip install ipython
+
+- Em seguida, adiciono o arquivo chromedriver.exe no mesmo diretório que meu arquivo main.py.
