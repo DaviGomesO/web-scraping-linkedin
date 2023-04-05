@@ -9,11 +9,42 @@ from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
 import re
 import datetime
-import csv
+import pandas as pd
 
 # para separar a string quando encontrar o primeiro digito
 padrao = r"(\d)"  # significa um digito
 
+### Função de Scrolling na pagina
+## Não está funcionando
+'''# Realizar o scrolling até o fim da página
+def Scrolling():
+    contador = 0
+    altura_anterior = driver.execute_script("return window.pageYOffset;")
+    while contador < 2:
+        # Realizar o scrolling até o fim da página
+        actions = ActionChains(driver)
+        actions.send_keys(Keys.END).perform()
+        sleep(2)  # Aguardar um tempo para carregar mais vagas
+    
+        # Verificar se não há mais vagas para carregar (chegou ao fim da página)
+        try:
+            even_ver_mais = driver.find_elements(by=By.XPATH, value='//*[@id="main-content"]/section[2]/button')[0]
+            #even_ver_mais.click()
+            driver.execute_script("arguments[0].click();", even_ver_mais)
+            # Verificar se a altura da página foi alterada
+            altura_atual = driver.execute_script("return window.pageYOffset;")
+            if altura_atual == altura_anterior:
+                # Incrementar o contador quando o botão não estiver mais disponível
+                contador += 1
+            else:
+                # Zerar o contador quando a página for expandida
+                contador = 0
+            altura_anterior = altura_atual
+        except NoSuchElementException:
+             # Incrementar o contador quando o botão não estiver mais disponível
+            contador += 1
+            continue
+'''
 
 ### Funções de Scraping para páginas
 ## Raspagem nos dados do tipo de contratação e nível de experiência
@@ -107,6 +138,8 @@ except:
     # Se o elemento não estiver presente, não faz nada
     pass
 
+#Scrolling()
+
 sleep(2)
 # URL da vaga
 vagas_links = driver.find_elements(By.XPATH, '/html/body/div[1]/div/main/section[2]/ul/li/div/a')
@@ -135,7 +168,7 @@ vagas_tipo, vagas_nivel, links_sites_emp, num_candidaturas = [], [], [], []
 seguidores_empresa, local_empresa, qtd_func = [], [], []
 horario_Scraping = []
 
-j = 1
+j = 0
 for i in vagas_links:
     agora = datetime.datetime.now()
     formatado = agora.strftime("%d/%m/%Y %H:%M")
@@ -189,5 +222,20 @@ for i in vagas_links:
 # URL da candidatura
 '''A URL da candidatura só consigo pegar se estiver logado, pois apenas direciona ao link aqueles que estiverem 
  cadastrados e logados'''
+
+# Guardando informações no arquivo CSV
+sleep(2)
+col = ["URL da vaga no linkedin", "Nome da vaga",
+                 "Nome da empresa contratante","URL da empresa contratante",
+                "Tipo de contratação", "Nível de experiência", "Número de candidaturas para vaga",
+                 "Horário do scraping", "Número de funcionários da empresa", "Número de seguidores da empresa",
+                "Local sede da empresa"]
+df = pd.DataFrame({"URL da vaga no linkedin":vagas_links, "Nome da vaga":vagas_title,
+                 "Nome da empresa contratante":vagas_empresa,"URL da empresa contratante":links_sites_emp,
+                "Tipo de contratação":vagas_tipo, "Nível de experiência":vagas_nivel, "Número de candidaturas para vaga":num_candidaturas,
+                   "Horário do scraping": horario_Scraping, "Número de funcionários da empresa":qtd_func,
+                   "Número de seguidores da empresa":seguidores_empresa,"Local sede da empresa":local_empresa})
+df.head()
+df.to_csv("Scraping (Outro)- Francisco Davi Gomes de Oliveira.csv", mode='w')
 
 driver.quit()
